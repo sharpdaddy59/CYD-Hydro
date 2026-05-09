@@ -44,6 +44,8 @@ $libs = @(
     'LovyanGFX'
     'WiFiManager'
     'ArduinoJson'
+    'OneWire'              # 1-Wire bus driver for DS18B20
+    'DallasTemperature'    # DS18B20 temperature decoder (depends on OneWire)
 )
 foreach ($lib in $libs) {
     Write-Host "[setup] Installing library: $lib"

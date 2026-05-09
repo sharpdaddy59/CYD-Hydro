@@ -10,7 +10,7 @@
 
 #pragma once
 
-#define FW_VERSION       "0.1.0"
+#define FW_VERSION       "0.1.1"
 
 // ---------------------------------------------------------------------------
 // Display (ILI9341, HSPI bus, 240x320 portrait native -> rotated to 320x240)
@@ -56,6 +56,9 @@
 
 #define DHT20_INTERVAL_MS    5000
 #define DS18B20_INTERVAL_MS  5000
+#define LDR_INTERVAL_MS      5000
+
+#define HTTP_PORT            80
 
 // ---------------------------------------------------------------------------
 // WiFi onboarding (WiFiManager AP fallback when no creds saved)

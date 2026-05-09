@@ -18,20 +18,17 @@ static constexpr int HERO_LINE0_Y  = HERO_TOP + 4;
 static constexpr int HERO_LINE_DY  = 38;
 static constexpr int RIGHT_PAD     = 8;
 
-// Row counts as stale once its sample-stamp is this old. Generous
-// vs. the configured DHT20/DS18B20 intervals so a single missed read
-// doesn't flip the colour.
-static constexpr uint32_t STALE_AFTER_MS = 30000;
-
 // uint16_t (not uint32_t) so LovyanGFX's color path treats values as
 // RGB565. Same gotcha hydro-dash hit at v0.1.4 — uint32_t dispatches
 // to the RGB888 overload and the bytes get reinterpreted, turning
 // TFT_GREEN into red.
+//
+// Staleness threshold lives in state.cpp::reading_is_fresh (same
+// SENSOR_STALE_S that the /sensors HTTP handler uses, so the colour
+// in the UI agrees with the null-vs-value decision in the JSON).
 static uint16_t row_color(uint32_t ss_boot, bool simulated) {
-  uint32_t now = millis();
-  if (ss_boot == 0)                   return 0x7BEF;     // never sampled — dim grey
-  if (now - ss_boot > STALE_AFTER_MS) return 0x7BEF;     // stale — dim grey
-  if (simulated)                      return TFT_YELLOW;
+  if (!reading_is_fresh(ss_boot, now_seconds_since_boot())) return 0x7BEF;
+  if (simulated)                                            return TFT_YELLOW;
   return TFT_GREEN;
 }
 
@@ -69,21 +66,22 @@ static void draw_readings() {
     char buf[16];
     if (isnan(v))                     snprintf(buf, sizeof(buf), "--");
     else if (strcmp(unit, "%") == 0)  snprintf(buf, sizeof(buf), "%.0f%s", v, unit);
+    else if (unit[0] == '\0')         snprintf(buf, sizeof(buf), "%.0f", v);
     else                              snprintf(buf, sizeof(buf), "%.1f%s", v, unit);
     int tw = g.textWidth(buf);
     g.setCursor(W - RIGHT_PAD - tw, FY(y, LINE_H));
     g.print(buf);
   };
 
-  // Air and Humidity share sim_air — same DHT20 device on the sensor side.
-  reading(0, "Water",    g_sensors.water_temp.load(), "C",
-          g_sensors.ss_boot_water.load(), g_sensors.sim_water.load());
-  reading(1, "Air",      g_sensors.air_temp.load(),   "C",
-          g_sensors.ss_boot_air.load(),   g_sensors.sim_air.load());
-  reading(2, "Humidity", g_sensors.humidity.load(),   "%",
-          g_sensors.ss_boot_air.load(),   g_sensors.sim_air.load());
-  reading(3, "Light",    g_sensors.light.load(),      "",
-          g_sensors.ss_boot_light.load(), g_sensors.sim_light.load());
+  // Air and Humidity share simulate_air — same DHT20 device on the sensor side.
+  reading(0, "Water",    g_sensors.water_temp.load(),     "C",
+          g_sensors.seconds_since_boot_water.load(), g_sensors.simulate_water.load());
+  reading(1, "Air",      g_sensors.air_temp.load(),       "C",
+          g_sensors.seconds_since_boot_air.load(),   g_sensors.simulate_air.load());
+  reading(2, "Humidity", g_sensors.humidity.load(),       "%",
+          g_sensors.seconds_since_boot_air.load(),   g_sensors.simulate_air.load());
+  reading(3, "Light",    (float)g_sensors.light.load(),   "",
+          g_sensors.seconds_since_boot_light.load(), g_sensors.simulate_light.load());
 
   // Footer: IP + RSSI in dim grey for low visual weight.
   const int FOOTER_LINE_H = 16;

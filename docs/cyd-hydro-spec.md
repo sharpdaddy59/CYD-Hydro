@@ -11,6 +11,25 @@ diverges from the spec, update the spec.
 
 ## Changelog
 
+- **v0.1.1 (Phase 2 — sensors + HTTP):** DHT20 (CN1, GPIO 22/27),
+  DS18B20 (Speaker JST, GPIO 26 + external 4.7 kΩ pull-up), and the
+  on-board LDR all read on FreeRTOS tasks. Each writes its atomic in
+  `g_sensors` and bumps `g_state_version` so the hero view re-renders
+  on each fresh sample. mDNS service advertise on
+  `cyd-hydro-<last4mac>.local` so a hydro-dash unit on the LAN can
+  discover us via shape-probing. Synchronous `WebServer` exposes
+  `/sensors`, `/status`, `/sim` (GET + POST per-sensor toggle), and
+  `/wifi/reset` — JSON shape on `/sensors` matches cores3-hydro
+  verbatim so dashboards can poll cyd-hydro and CoreS3-hydro
+  interchangeably. `simulation.{cpp,h}` and `sim_state.{cpp,h}`
+  ported from cores3-hydro (sim_state under namespace `cyd-sim` to
+  keep separate from a CoreS3 firmware reflashed onto the same chip).
+  Note: the `light` field is published as 4095 minus the raw ADC so
+  the value goes UP with brightness (matching cores3-hydro's lux
+  direction) — but the magnitudes aren't comparable since the LDR is
+  uncalibrated and CoreS3 reports calibrated lux from the LTR-553ALS.
+  Sketch size at 1.19 MB / 1.31 MB (90% — Phase 3 OTA will need a
+  partition scheme switch).
 - **v0.1.0 (Phase 1 scaffold):** repo skeleton + display + WiFiManager
   + brightness auto-dim ported from hydro-dash with the v0.1.5 LDR
   polarity fix included. Hero view shows hostname banner, four sensor

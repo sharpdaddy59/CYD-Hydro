@@ -144,10 +144,17 @@ Reference: https://randomnerdtutorials.com/esp32-cheap-yellow-display-cyd-pinout
 
 ## Recent state
 
+- **v0.1.1 (Phase 2 — sensors + HTTP, current):** DHT20 + DS18B20 +
+  LDR sample tasks live; mDNS advertise; `/sensors`, `/status`,
+  `/sim`, `/wifi/reset` HTTP endpoints. JSON contract on `/sensors`
+  matches cores3-hydro verbatim. `light` value is inverted-direction
+  raw (4095 minus ADC, higher = brighter) — magnitude doesn't match
+  CoreS3's lux but direction does. Sketch at 90% of the default
+  partition's app slot — Phase 3 OTA needs partition scheme switch.
 - **v0.1.0 (Phase 1 scaffold):** display + WiFiManager + auto-dim.
-  No sensors yet — they arrive in Phase 2. Boot orchestration in
-  `cyd-hydro.ino` has TODO markers for the missing pieces. Hero view
-  shows hostname + four `--` rows + IP/RSSI footer.
+  No sensors yet. Boot orchestration in `cyd-hydro.ino` has TODO
+  markers for the missing pieces. Hero view shows hostname + four
+  `--` rows + IP/RSSI footer.
 
 ## Where to look first
 
