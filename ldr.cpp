@@ -29,8 +29,6 @@ static void ldr_task(void *param) {
   for (;;) {
     uint16_t value;
     if (g_sensors.simulate_light.load()) {
-      // Sim mode emits 0..1000 (cores3-hydro lux range). Use directly
-      // — already in the "higher = brighter" direction.
       value = sim_light();
     } else {
       // Burst-of-3 + take last. The CYD's high-impedance LDR divider
@@ -40,14 +38,15 @@ static void ldr_task(void *param) {
       // hydro-dash/docs/cyd-ldr-test settled on.
       analogRead(LDR_PIN);
       analogRead(LDR_PIN);
-      uint16_t raw = (uint16_t)analogRead(LDR_PIN);
-      // Invert so the published value goes UP with brightness, matching
-      // the intuitive direction (and cores3-hydro's lux semantics, even
-      // though the magnitudes aren't directly comparable — this LDR is
-      // uncalibrated). CYD wiring is high-pull-up: R10 1MΩ to 3V3, LDR
-      // to GND, so raw ADC reads LOW for bright, HIGH for dark.
-      value = (raw >= 4095) ? 0 : (uint16_t)(4095 - raw);
+      value = (uint16_t)analogRead(LDR_PIN);
     }
+    // Publish the raw 12-bit ADC value (0..4095) directly. We don't
+    // invert, normalise, or pretend it's lux — this is an uncalibrated
+    // LDR, and any "interpretation" would be arbitrary anyway.
+    // Direction is determined by CYD wiring (R10 1MΩ pull-up to 3V3,
+    // LDR to GND): bright light pulls the tap toward GND so raw goes
+    // DOWN; dark lets the pull-up dominate so raw goes UP. Documented
+    // in docs/cyd-hydro-spec.md §`/sensors` so consumers know.
     g_sensors.light.store(value);
     g_sensors.seconds_since_boot_light.store(now_seconds_since_boot());
     g_sensors.has_data.store(true);

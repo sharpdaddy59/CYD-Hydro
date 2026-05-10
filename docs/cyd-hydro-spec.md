@@ -11,6 +11,18 @@ diverges from the spec, update the spec.
 
 ## Changelog
 
+- **v0.1.2:** Stop interpreting the `light` value. v0.1.1 inverted the
+  raw ADC (`4095 - raw`) to make the published number rise with
+  brightness, ostensibly to match the direction of cores3-hydro's lux
+  output. But the LDR is uncalibrated, the magnitudes were never
+  comparable to lux anyway, and the inversion just added a layer of
+  pseudo-meaning on top of an arbitrary number. Now we publish the raw
+  12-bit ADC value directly (0..4095, **higher = darker** because of
+  the CYD's high-pull-up wiring). Display matches JSON exactly.
+  Consumers that want a label (Bright/Dim/Dark) or a normalised
+  percentage can derive one — we don't pretend to. `sim_light()`
+  range adjusted from 0..1000 to 0..4095 so sim-mode and real-mode
+  values are at least directionally consistent.
 - **v0.1.1 (Phase 2 — sensors + HTTP):** DHT20 (CN1, GPIO 22/27),
   DS18B20 (Speaker JST, GPIO 26 + external 4.7 kΩ pull-up), and the
   on-board LDR all read on FreeRTOS tasks. Each writes its atomic in
@@ -110,7 +122,7 @@ Identical to cores3-hydro's `/sensors` response. From the port plan:
   "water_temp": 22.5,
   "air_temp":   24.1,
   "humidity":   55,
-  "light":      320,
+  "light":      3850,
   "rssi":       -45,
   "wifi_ok":    true,
   "ss_boot_water": 9120,
@@ -120,9 +132,31 @@ Identical to cores3-hydro's `/sensors` response. From the port plan:
 }
 ```
 
-`light` and `ss_boot_light` are omitted when `USE_LDR=0`. `ss_boot_*`
-values are millis()-since-boot at the moment of the most recent
-sample — consumers detect staleness without needing NTP.
+Field semantics:
+
+- `water_temp` / `air_temp`: degrees Celsius (float). `null` when the
+  sensor has never produced a reading or its last reading is stale
+  (>120 s old).
+- `humidity`: percent (integer). Same null semantics, gated on the
+  DHT20's freshness because air + humidity share the device.
+- `light`: **raw 12-bit ADC value, 0..4095. Higher = darker** because
+  of the CYD's high-pull-up wiring (R10 1MΩ to 3V3, LDR to GND, GPIO
+  34 between them). The LDR is uncalibrated — this is *not* lux, *not*
+  a percentage, and **not directionally consistent with cores3-hydro's
+  `light` field** (which reports calibrated lux from the LTR-553ALS,
+  higher = brighter). A polling consumer that wants to label or
+  normalise the value can do so based on its own thresholds; we
+  publish the raw read and stay out of the interpretation business.
+- `rssi`: live `WiFi.RSSI()` integer, dBm.
+- `ss_boot_*`: seconds-since-boot at the moment of the most recent
+  sample for that sensor (0 = never sampled). Consumers detect
+  staleness from these without needing NTP.
+- `wifi_ok`: live `WiFi.status() == WL_CONNECTED`.
+- `simulated`: per-sensor sim-mode flags, true if the corresponding
+  value came from `simulation.cpp` instead of real hardware.
+
+`light`, `ss_boot_light`, and `simulated.light` are omitted entirely
+when `USE_LDR=0`.
 
 ## Hero view
 

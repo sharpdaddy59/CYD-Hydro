@@ -16,4 +16,6 @@ static float frand_in(float lo, float hi) {
 float    sim_air_temp()   { return frand_in(18.0f, 30.0f); }
 float    sim_humidity()   { return frand_in(40.0f, 80.0f); }
 float    sim_water_temp() { return frand_in(20.0f, 28.0f); }
-uint16_t sim_light()      { return (uint16_t)frand_in(0.0f, 1000.0f); }
+// Match real-mode semantics: raw ADC 0..4095, higher = darker. See
+// ldr.cpp comment about CYD wiring polarity.
+uint16_t sim_light()      { return (uint16_t)frand_in(0.0f, 4095.0f); }
