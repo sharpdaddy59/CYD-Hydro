@@ -16,11 +16,10 @@ shows what's true right now.
 
 A growing-station node was previously a CoreS3 + DIN base (~$70) with a
 camera, AXP2101 power management, and a 2" display. Replacing it with a
-CYD trades the camera (used only for QR-based WiFi setup, replaceable
-with WiFiManager) and ambient-light sensor reliability (CYD's LDR is a
+CYD trades the camera and ambient-light sensor reliability (CYD's LDR is a
 per-unit lottery; toggleable via `USE_LDR`) for ~5× cost reduction and a
 larger built-in display — which removes the need for a separate hydro-dash
-unit per station.
+unit per station. The camera itself can be replaced with a $12 ESP-cam module.
 
 Background: [cores3-hydro/docs/cyd-port-plan.md](https://github.com/sharpdaddy59/cores3-hydro/blob/main/docs/cyd-port-plan.md).
 
