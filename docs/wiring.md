@@ -16,6 +16,13 @@ You only need to build this once per station. The complete harness has:
 If you'd rather not build it yourself, see the [alternatives section](#alternatives)
 at the end.
 
+> **Printing tip.** This page is dense in the middle (the [Topology](#topology)
+> ASCII diagram is ~25 lines tall). For a clean printout, use your browser's
+> **landscape orientation** when printing — that keeps the diagram on a
+> single page. The page-break HTML below works in PDF exports / local
+> renderers but is stripped by GitHub's sanitizer when printing direct
+> from github.com.
+
 ---
 
 ## Bill of materials
@@ -50,6 +57,8 @@ loose JST GH crimps, you can build them yourself, but the pigtails are
 | — | DS18B20 White (pin 2) | NC | cut short or leave un-crimped |
 
 ---
+
+<div style="page-break-before: always;"></div>
 
 ## Topology
 
