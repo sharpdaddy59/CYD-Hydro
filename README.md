@@ -40,7 +40,12 @@ the open-work list.
   GND / GPIO 22 (SDA) / GPIO 27 (SCL) / 3V3.
 - **DS18B20** waterproof probe (1-Wire): water temp. Wires to the
   **Speaker JST** — GND / GPIO 26 (DATA). Needs an external **4.7 kΩ
-  pull-up** from DATA to 3V3 if the probe doesn't ship with one.
+  pull-up** from DATA to 3V3 if the probe doesn't ship with one (the
+  Grove DS18B20 has it integrated).
+
+> **Building the harness?** [`docs/wiring.md`](docs/wiring.md) walks
+> through combining both sensors into a single plug-and-play harness
+> (BOM, pin map, ASCII topology, multimeter verification, troubleshooting).
 
 > **Other CYD revisions:** the S028C (capacitive) and various clone
 > variants have different pin maps. Update [`config.h`](config.h) and
